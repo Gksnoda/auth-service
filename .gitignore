@@ -11,6 +11,8 @@ wheels/
 
 # Claude
 .serena
+.mcp*
+
 
 # env
 .env
