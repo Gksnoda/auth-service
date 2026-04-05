@@ -4,4 +4,7 @@ version = "0.1.0"
 description = "Authentication service provider built with FastAPI"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "fastapi[standard]>=0.135.3",
+    "pydantic[email]>=2.12.5",
+]
