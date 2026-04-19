@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '@/components/AuthLayout/AuthLayout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ export function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading, error, success, reset } = useLogin();
+  const navigate = useNavigate();
 
   const onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -26,7 +27,10 @@ export function LoginPage() {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await login({ email, password });
+    const data = await login({ email, password });
+    if (data) {
+      navigate('/home', { state: { token: data.access_token } });
+    }
   };
 
   const right = (

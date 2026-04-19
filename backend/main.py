@@ -1,5 +1,7 @@
 import os
+from datetime import datetime, timedelta, timezone
 
+import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 from dotenv import load_dotenv
@@ -11,6 +13,10 @@ from supabase import create_client
 load_dotenv()
 
 supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
+
+JWT_SECRET = os.environ["JWT_SECRET"]
+JWT_ALGORITHM = "HS256"
+ACCESS_TOKEN_TTL = timedelta(minutes=15)
 
 app = FastAPI()
 
@@ -39,6 +45,18 @@ ph = PasswordHasher()
 DUMMY_HASH = ph.hash("dummy-password-for-timing")
 
 
+def _create_access_token(user: dict) -> str:
+    now = datetime.now(timezone.utc)
+    payload = {
+        "sub": str(user["id"]),
+        "email": user["email"],
+        "role": user.get("role", "user"),
+        "iat": now,
+        "exp": now + ACCESS_TOKEN_TTL,
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
@@ -61,7 +79,8 @@ def login(body: LoginRequest):
     except VerifyMismatchError:
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    return {"message": "Login ok"}
+    access_token = _create_access_token(user)
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.post("/auth/register", status_code=201)

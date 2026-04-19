@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { login as loginRequest } from '../lib/auth';
 import { ApiError, NetworkError } from '../lib/apiClient';
-import type { LoginCredentials } from '../types/auth';
+import type { LoginCredentials, LoginResponse } from '../types/auth';
 
 export interface UseLoginResult {
-  login: (credentials: LoginCredentials) => Promise<boolean>;
+  login: (credentials: LoginCredentials) => Promise<LoginResponse | null>;
   loading: boolean;
   error: string | null;
   success: boolean;
@@ -22,17 +22,17 @@ export function useLogin(): UseLoginResult {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const login = useCallback(async (credentials: LoginCredentials): Promise<boolean> => {
+  const login = useCallback(async (credentials: LoginCredentials): Promise<LoginResponse | null> => {
     setLoading(true);
     setError(null);
     setSuccess(false);
     try {
-      await loginRequest(credentials);
+      const data = await loginRequest(credentials);
       setSuccess(true);
-      return true;
+      return data;
     } catch (err) {
       setError(toMessage(err));
-      return false;
+      return null;
     } finally {
       setLoading(false);
     }
