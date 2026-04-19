@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
-import { AuthLayout } from '../../components/AuthLayout/AuthLayout';
-import { Button } from '../../components/Button/Button';
-import { InputField } from '../../components/InputField/InputField';
-import { PasswordInput } from '../../components/PasswordInput/PasswordInput';
-import { useRegister } from '../../hooks/useRegister';
-import styles from './RegisterPage.module.css';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthLayout } from '@/components/AuthLayout/AuthLayout';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PasswordInput } from '@/components/ui/password-input';
+import { useRegister } from '@/hooks/useRegister';
 
 export function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { register, loading, error, success, reset } = useRegister();
+  const navigate = useNavigate();
 
   const onNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
@@ -33,63 +34,72 @@ export function RegisterPage() {
     e.preventDefault();
     const ok = await register({ name: name || null, email, password });
     if (ok) {
-      setName('');
-      setEmail('');
-      setPassword('');
+      navigate('/login');
     }
   };
 
   const right = (
-    <section className={styles.right}>
-      <h1 className={styles.heading}>Create account</h1>
-      <div className={styles.sub}>One email, one password — that&apos;s all we need.</div>
+    <section className="flex flex-col justify-center px-11 py-14 max-sm:px-7 max-sm:py-8">
+      <h1 className="font-heading text-[32px] font-bold leading-none mb-1">Create account</h1>
+      <p className="text-sm text-muted-foreground mb-6">
+        One email, one password — that&apos;s all we need.
+      </p>
 
-      <form onSubmit={onSubmit} noValidate>
-        <InputField
-          label="Name (optional)"
-          name="name"
-          type="text"
-          value={name}
-          onChange={onNameChange}
-          placeholder="Your name (optional)"
-          autoComplete="name"
-        />
+      <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+        <div className="grid gap-1.5">
+          <Label htmlFor="name">Name (optional)</Label>
+          <Input
+            id="name"
+            name="name"
+            type="text"
+            value={name}
+            onChange={onNameChange}
+            placeholder="Your name (optional)"
+            autoComplete="name"
+          />
+        </div>
 
-        <InputField
-          label="Email"
-          name="email"
-          type="email"
-          value={email}
-          onChange={onEmailChange}
-          placeholder="you@example.com"
-          autoComplete="email"
-          required
-        />
+        <div className="grid gap-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={email}
+            onChange={onEmailChange}
+            placeholder="you@example.com"
+            autoComplete="email"
+            required
+          />
+        </div>
 
-        <PasswordInput
-          label="Password"
-          name="password"
-          value={password}
-          onChange={onPasswordChange}
-          placeholder="At least 5 characters"
-          autoComplete="new-password"
-          required
-        />
+        <div className="grid gap-1.5">
+          <Label htmlFor="password">Password</Label>
+          <PasswordInput
+            id="password"
+            name="password"
+            value={password}
+            onChange={onPasswordChange}
+            placeholder="At least 5 characters"
+            autoComplete="new-password"
+            required
+          />
+        </div>
 
-        {error ? <div className={styles.formError}>{error}</div> : null}
-        {success && !error ? <div className={styles.formSuccess}>Account created</div> : null}
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {success && !error ? <p className="text-sm text-primary">Account created</p> : null}
 
-        <Button variant="accent" type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading}>
           Create account
         </Button>
       </form>
 
-      <div className={styles.footerLine}>
+      <p className="mt-6 text-sm text-muted-foreground">
         Already have an account?{' '}
-        <Link to="/login" className={styles.footerLink}>
+        <Link to="/login" className="text-primary underline underline-offset-2">
           Sign in
         </Link>
-      </div>
+      </p>
     </section>
   );
 

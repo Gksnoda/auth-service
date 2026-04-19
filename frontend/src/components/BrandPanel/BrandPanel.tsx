@@ -3,11 +3,6 @@ import styles from './BrandPanel.module.css';
 export function BrandPanel() {
   return (
     <aside className={styles.left}>
-      <div className={styles.brand}>
-        <span className={styles.brandMark} />
-        <span>Your product</span>
-      </div>
-
       <div className={styles.tagline}>
         Hi, I&apos;m <em>Gustavo</em>.
       </div>
