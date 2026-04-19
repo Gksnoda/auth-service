@@ -1,0 +1,14 @@
+:root {
+  --ink: #1a1a1a;
+  --ink-soft: #3a3a3a;
+  --ink-faint: #8a8a8a;
+  --paper: #fafaf7;
+  --paper-2: #f2f1eb;
+  --accent: #2a5bd7;
+  --accent-soft: #e6ecfb;
+  --danger: #c4352b;
+  --danger-soft: #fbe9e7;
+  --hand: 'Kalam', 'Caveat', cursive;
+  --script: 'Caveat', cursive;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+}

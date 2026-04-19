@@ -1,0 +1,87 @@
+.right {
+  padding: 56px 44px 36px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.heading {
+  font-family: var(--script);
+  font-size: 32px;
+  margin: 0 0 4px;
+  font-weight: 700;
+}
+
+.sub {
+  color: var(--ink-faint);
+  font-size: 14px;
+  margin-bottom: 22px;
+}
+
+.forgotLink {
+  font-family: var(--hand);
+  font-size: 14px;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  text-decoration-style: wavy;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.forgotLink:hover {
+  color: var(--accent);
+}
+
+.formError {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--danger);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  animation: shake 0.35s ease;
+}
+
+.formError::before {
+  content: '!';
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.formSuccess {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--accent);
+  margin: 0 0 12px;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 720px) {
+  .right {
+    padding: 32px 28px;
+  }
+}

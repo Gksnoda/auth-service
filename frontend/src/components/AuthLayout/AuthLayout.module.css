@@ -1,0 +1,29 @@
+.card {
+  width: 100%;
+  max-width: 960px;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+  background: var(--paper);
+  box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 560px;
+}
+
+@media (max-width: 720px) {
+  .card {
+    max-width: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    min-height: 100vh;
+  }
+  .split {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+}

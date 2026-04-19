@@ -1,0 +1,177 @@
+.left {
+  padding: 44px 40px;
+  background: var(--paper-2);
+  border-right: 1.5px dashed rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--script);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.brandMark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 2px solid var(--ink);
+  background: var(--paper);
+  display: grid;
+  place-items: center;
+  transform: rotate(-4deg);
+}
+
+.brandMark::after {
+  content: '◆';
+  font-size: 14px;
+}
+
+.tagline {
+  font-family: var(--script);
+  font-size: 32px;
+  line-height: 1.15;
+  font-weight: 700;
+  margin-top: 12px;
+}
+
+.tagline em {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.desc {
+  font-size: 14px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  max-width: 300px;
+}
+
+.socialLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.socialChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1.8px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper);
+  font-family: var(--hand);
+  font-size: 15px;
+  color: var(--ink);
+  text-decoration: none;
+  width: fit-content;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    background 0.18s ease;
+  cursor: pointer;
+}
+
+.socialChip:hover {
+  transform: translateY(-2px) rotate(-1deg);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.15);
+  background: var(--paper-2);
+}
+
+.sIco {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1.5px solid var(--ink);
+  background: var(--paper-2);
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sArrow {
+  color: var(--ink-faint);
+  font-size: 14px;
+  margin-left: 4px;
+  transition:
+    transform 0.18s ease,
+    color 0.18s ease;
+}
+
+.socialChip:hover .sArrow {
+  color: var(--accent);
+  transform: translate(2px, -2px);
+}
+
+.leftFooter {
+  margin-top: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  animation: floaty 6s ease-in-out infinite;
+}
+
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.ribbon {
+  font-family: var(--hand);
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 2px 8px;
+  border: 1.2px solid var(--ink);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ribbon::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+@media (max-width: 720px) {
+  .left {
+    padding: 28px;
+    border-right: none;
+    border-bottom: 1.5px dashed rgba(0, 0, 0, 0.2);
+    gap: 12px;
+  }
+  .tagline {
+    font-size: 24px;
+    margin-top: 4px;
+  }
+  .desc {
+    font-size: 13px;
+  }
+  .socialLinks {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .leftFooter {
+    display: none;
+  }
+}
