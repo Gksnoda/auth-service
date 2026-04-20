@@ -8,7 +8,9 @@ function decodeJwtPayload(token: string): Record<string, unknown> {
 
 export function HomePage() {
   const location = useLocation();
-  const token = (location.state as { token?: string } | null)?.token;
+  const state = location.state as { token?: string; refreshToken?: string } | null;
+  const token = state?.token;
+  const refreshToken = state?.refreshToken;
 
   if (!token) {
     return <Navigate to="/login" replace />;
@@ -38,6 +40,17 @@ export function HomePage() {
             {JSON.stringify(payload, null, 2)}
           </pre>
         </section>
+
+        {refreshToken ? (
+          <section>
+            <h2 className="mb-2 text-sm font-semibold tracking-wider text-muted-foreground">
+              REFRESH TOKEN
+            </h2>
+            <pre className="overflow-x-auto break-all rounded-md border bg-muted p-4 text-xs whitespace-pre-wrap">
+              {refreshToken}
+            </pre>
+          </section>
+        ) : null}
       </div>
     </main>
   );

@@ -189,3 +189,82 @@ def test_login_missing_password():
     })
 
     assert response.status_code == 422
+
+
+@patch("main.ph")
+@patch("main.supabase")
+def test_login_returns_refresh_token(mock_supabase, mock_ph):
+    _mock_supabase_select(mock_supabase, data=[{
+        "id": "user-42",
+        "email": "test@example.com",
+        "password_hash": "stored-hash",
+    }])
+    mock_ph.verify.return_value = True
+
+    response = client.post("/auth/login", json={
+        "email": "test@example.com",
+        "password": "validpass",
+    })
+
+    assert response.status_code == 200
+    body = response.json()
+    assert isinstance(body.get("refresh_token"), str)
+    assert len(body["refresh_token"]) > 0
+
+
+@patch("main.ph")
+@patch("main.supabase")
+def test_login_persists_refresh_token_in_db(mock_supabase, mock_ph):
+    _mock_supabase_select(mock_supabase, data=[{
+        "id": "user-42",
+        "email": "test@example.com",
+        "password_hash": "stored-hash",
+    }])
+    mock_ph.verify.return_value = True
+
+    response = client.post("/auth/login", json={
+        "email": "test@example.com",
+        "password": "validpass",
+    })
+
+    assert response.status_code == 200
+    tables_accessed = [call.args[0] for call in mock_supabase.table.call_args_list]
+    assert "refresh_tokens" in tables_accessed
+
+    mock_chain = mock_supabase.table.return_value
+    insert_calls = mock_chain.insert.call_args_list
+    assert any(
+        call.args
+        and isinstance(call.args[0], dict)
+        and call.args[0].get("user_id") == "user-42"
+        and call.args[0].get("token_hash")
+        and call.args[0].get("expires_at")
+        for call in insert_calls
+    )
+
+
+@patch("main.ph")
+@patch("main.supabase")
+def test_login_refresh_token_is_not_stored_in_plaintext(mock_supabase, mock_ph):
+    _mock_supabase_select(mock_supabase, data=[{
+        "id": "user-42",
+        "email": "test@example.com",
+        "password_hash": "stored-hash",
+    }])
+    mock_ph.verify.return_value = True
+
+    response = client.post("/auth/login", json={
+        "email": "test@example.com",
+        "password": "validpass",
+    })
+
+    refresh_token = response.json()["refresh_token"]
+    mock_chain = mock_supabase.table.return_value
+    insert_calls = mock_chain.insert.call_args_list
+    stored_hashes = [
+        call.args[0]["token_hash"]
+        for call in insert_calls
+        if call.args and isinstance(call.args[0], dict) and "token_hash" in call.args[0]
+    ]
+    assert stored_hashes, "expected at least one insert with a token_hash"
+    assert refresh_token not in stored_hashes

@@ -1,4 +1,6 @@
+import hashlib
 import os
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -17,6 +19,8 @@ supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_KEY"])
 JWT_SECRET = os.environ["JWT_SECRET"]
 JWT_ALGORITHM = "HS256"
 ACCESS_TOKEN_TTL = timedelta(minutes=15)
+REFRESH_TOKEN_TTL = timedelta(days=7)
+REFRESH_TOKEN_BYTES = 32
 
 app = FastAPI()
 
@@ -39,6 +43,10 @@ class CreateAccountRequest(BaseModel):
     name: str | None = None
 
 
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
 ph = PasswordHasher()
 # Precomputed hash used to keep login timing constant when the email does not
 # exist, so attackers cannot enumerate accounts by measuring response time.
@@ -55,6 +63,21 @@ def _create_access_token(user: dict) -> str:
         "exp": now + ACCESS_TOKEN_TTL,
     }
     return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+
+
+def _hash_refresh_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+
+def _create_refresh_token(user_id: str) -> str:
+    raw_token = secrets.token_urlsafe(REFRESH_TOKEN_BYTES)
+    expires_at = datetime.now(timezone.utc) + REFRESH_TOKEN_TTL
+    supabase.table("refresh_tokens").insert({
+        "user_id": user_id,
+        "token_hash": _hash_refresh_token(raw_token),
+        "expires_at": expires_at.isoformat(),
+    }).execute()
+    return raw_token
 
 
 @app.get("/health")
@@ -80,7 +103,57 @@ def login(body: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     access_token = _create_access_token(user)
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token = _create_refresh_token(user["id"])
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@app.post("/auth/refresh")
+def refresh(body: RefreshRequest):
+    token_hash = _hash_refresh_token(body.refresh_token)
+    result = (
+        supabase.table("refresh_tokens")
+        .select("*")
+        .eq("token_hash", token_hash)
+        .execute()
+    )
+
+    if not result.data:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    token_row = result.data[0]
+    if token_row.get("revoked_at") is not None:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    expires_at = datetime.fromisoformat(token_row["expires_at"])
+    if expires_at <= datetime.now(timezone.utc):
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    supabase.table("refresh_tokens").update({
+        "revoked_at": datetime.now(timezone.utc).isoformat(),
+    }).eq("id", token_row["id"]).execute()
+
+    user_result = (
+        supabase.table("users")
+        .select("*")
+        .eq("id", token_row["user_id"])
+        .execute()
+    )
+    if not user_result.data:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+    user = user_result.data[0]
+    access_token = _create_access_token(user)
+    new_refresh_token = _create_refresh_token(user["id"])
+
+    return {
+        "access_token": access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer",
+    }
 
 
 @app.post("/auth/register", status_code=201)

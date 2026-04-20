@@ -29,7 +29,12 @@ export function LoginPage() {
     e.preventDefault();
     const data = await login({ email, password });
     if (data) {
-      navigate('/home', { state: { token: data.access_token } });
+      navigate('/home', {
+        state: {
+          token: data.access_token,
+          refreshToken: data.refresh_token,
+        },
+      });
     }
   };
 
