@@ -1,5 +1,5 @@
-from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, MagicMock
+from datetime import UTC, datetime, timedelta
+from unittest.mock import MagicMock, patch
 
 import jwt
 from fastapi.testclient import TestClient
@@ -26,11 +26,11 @@ def _mock_supabase_by_table(mock_supabase, tables):
 
 
 def _future_iso(days=7):
-    return (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+    return (datetime.now(UTC) + timedelta(days=days)).isoformat()
 
 
 def _past_iso(days=1):
-    return (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    return (datetime.now(UTC) - timedelta(days=days)).isoformat()
 
 
 def _valid_token_row(user_id="user-42", token_id="rt-1"):

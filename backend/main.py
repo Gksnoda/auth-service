@@ -1,7 +1,7 @@
 import hashlib
 import os
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import jwt
 from argon2 import PasswordHasher
@@ -54,7 +54,7 @@ DUMMY_HASH = ph.hash("dummy-password-for-timing")
 
 
 def _create_access_token(user: dict) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload = {
         "sub": str(user["id"]),
         "email": user["email"],
@@ -71,7 +71,7 @@ def _hash_refresh_token(token: str) -> str:
 
 def _create_refresh_token(user_id: str) -> str:
     raw_token = secrets.token_urlsafe(REFRESH_TOKEN_BYTES)
-    expires_at = datetime.now(timezone.utc) + REFRESH_TOKEN_TTL
+    expires_at = datetime.now(UTC) + REFRESH_TOKEN_TTL
     supabase.table("refresh_tokens").insert({
         "user_id": user_id,
         "token_hash": _hash_refresh_token(raw_token),
@@ -100,7 +100,7 @@ def login(body: LoginRequest):
     try:
         ph.verify(user["password_hash"], body.password)
     except VerifyMismatchError:
-        raise HTTPException(status_code=401, detail="Invalid email or password")
+        raise HTTPException(status_code=401, detail="Invalid email or password") from None
 
     access_token = _create_access_token(user)
     refresh_token = _create_refresh_token(user["id"])
@@ -129,11 +129,11 @@ def refresh(body: RefreshRequest):
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     expires_at = datetime.fromisoformat(token_row["expires_at"])
-    if expires_at <= datetime.now(timezone.utc):
+    if expires_at <= datetime.now(UTC):
         raise HTTPException(status_code=401, detail="Invalid refresh token")
 
     supabase.table("refresh_tokens").update({
-        "revoked_at": datetime.now(timezone.utc).isoformat(),
+        "revoked_at": datetime.now(UTC).isoformat(),
     }).eq("id", token_row["id"]).execute()
 
     user_result = (
@@ -168,7 +168,7 @@ def register(body: CreateAccountRequest):
         }).execute()
     except Exception as e:
         if "duplicate" in str(e).lower():
-            raise HTTPException(status_code=409, detail="Email already exists")
+            raise HTTPException(status_code=409, detail="Email already exists") from None
         raise
 
     return {"message": "Account created"}
